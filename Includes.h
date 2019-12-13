@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Display.h"
 #include "Types.h"
+#include "Display.h"
 #include "Map.h"
 #include "Draw.h"
