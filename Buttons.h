@@ -1,5 +1,5 @@
 #pragma once
-
+extern "C"{
 #define BTNNUM	8
 
 #define BTN_U	16
@@ -12,34 +12,34 @@
 #define BTN_A	5
 
 const union{
-	char arr[BTNNUM];
+	char arr[BTNNUM] = {'U','D','L','R','1','2','B','A'};
 	struct{
-		char btnU = 'U';
-		char btnD = 'D';
-		char btnL = 'L';
-		char btnR = 'R';
-		char btn1 = '1';
-		char btn2 = '2';
-		char btnB = 'B';
-		char btnA = 'A';
+		char btnU;
+		char btnD;
+		char btnL;
+		char btnR;
+		char btn1;
+		char btn2;
+		char btnB;
+		char btnA;
 	};
 }btnLabel;
 
 const union{
-	uint arr[BTNNUM];
+	uint arr[BTNNUM] = {16,17,18,19,8,7,6,5};
 	struct{
-		uint btnU = 16;
-		uint btnD = 17;
-		uint btnL = 18;
-		uint btnR = 19;
-		uint btn1 = 8;
-		uint btn2 = 7;
-		uint btnB = 6;
-		uint btnA = 5;
+		uint btnU;
+		uint btnD;
+		uint btnL;
+		uint btnR;
+		uint btn1;
+		uint btn2;
+		uint btnB;
+		uint btnA;
 	};
 }btnPin;
 
-union{
+volatile union{
 	bool arr[BTNNUM];
 	struct{
 		bool btnU;
@@ -53,27 +53,50 @@ union{
 	};
 }btnState;
 
+volatile struct{
+	bool arr[BTNNUM];
+	struct{
+		bool btnU;
+		bool btnD;
+		bool btnL;
+		bool btnR;
+		bool btn1;
+		bool btn2;
+		bool btnB;
+		bool btnA;
+	};
+}btnPressed;
+
+void onPress(void)
+{
+	for(uint i = 0; i < BTNNUM; i++) {
+		bool newState = !digitalRead(btnPin.arr[i]);
+		if(newState != btnState.arr[i]) {
+			btnState.arr[i] = newState;
+			btnPressed.arr[i] = true;
+		}
+	}
+}
+
 void showPressed(void)
 {
-	static bool prev[BTNNUM] = {0};
-	for(uint i = 0; i < BTNNUM; i++){
-		bool newState = !digitalRead(i);
-		if(newState != btnState.arr[i]){
-			btnState.arr[i] = newState;
+	for(uint i = 0; i < BTNNUM; i++) {
+		if(btnPressed.arr[i]){
 			screenBlank();
-			drawText(0, 0)
+			setCursor(0,0);
+			screen.print(btnLabel.arr[i]);
+			printText(btnState.arr[i] ? " Pressed":" Released");
+			btnPressed.arr[i] = false;
 		}
 	}
 }
 
 void btnInit(void)
 {
-	pinMode(BTN_U, INPUT_PULLUP);
-	pinMode(BTN_D, INPUT_PULLUP);
-	pinMode(BTN_L, INPUT_PULLUP);
-	pinMode(BTN_R, INPUT_PULLUP);
-	pinMode(BTN_1, INPUT_PULLUP);
-	pinMode(BTN_2, INPUT_PULLUP);
-	pinMode(BTN_B, INPUT_PULLUP);
-	pinMode(BTN_A, INPUT_PULLUP);
+	for(uint i = 0; i < BTNNUM; i++) {
+		pinMode(btnPin.arr[i], INPUT_PULLUP);
+		attachInterrupt(btnPin.arr[i], onPress, CHANGE);
+	}
 }
+
+} // extern "C"

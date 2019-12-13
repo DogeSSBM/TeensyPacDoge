@@ -21,10 +21,11 @@ struct Ghost {
 void setup()
 {
 	screenInit();
-	drawMap();
+	btnInit();
+	//drawMap();
 }
 
 void loop()
 {
-
+	showPressed();
 }
