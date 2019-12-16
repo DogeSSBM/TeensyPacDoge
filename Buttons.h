@@ -53,7 +53,7 @@ volatile union{
 	};
 }btnState;
 
-volatile struct{
+volatile union{
 	bool arr[BTNNUM];
 	struct{
 		bool btnU;
@@ -69,6 +69,7 @@ volatile struct{
 
 void onPress(void)
 {
+	cli();
 	for(uint i = 0; i < BTNNUM; i++) {
 		bool newState = !digitalRead(btnPin.arr[i]);
 		if(newState != btnState.arr[i]) {
@@ -76,6 +77,7 @@ void onPress(void)
 			btnPressed.arr[i] = true;
 		}
 	}
+	sei();
 }
 
 void showPressed(void)

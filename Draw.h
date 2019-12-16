@@ -6,8 +6,8 @@
 void drawMap(void)
 {
 	for(uint y = 0; y < MAPY; y++){
-		for(uint x = 0; x < MAPY; x++){
-			switch((blocks[y])[x]){
+		for(uint x = 0; x < MAPX; x++){
+			switch(blocks[y][x]){
 				case '#':	// Wall
 					screen.fillRect(x*SCALE, y*SCALE, SCALE, SCALE, BLUE);
 					break;
@@ -27,4 +27,16 @@ void drawMap(void)
 			}
 		}
 	}
+}
+
+void drawGhost(const Ghost g)
+{
+	setColor(g.color);
+	fillCircle(g.x,g.y,HSCALE-1);
+}
+
+void drawPacDoge(const PacDoge p)
+{
+	setColor(YELLOW);
+	fillCircle(p.x,p.y,HSCALE-1);
 }
