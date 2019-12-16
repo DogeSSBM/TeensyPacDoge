@@ -6,7 +6,8 @@ extern "C"{
 #define SPAWNX	14
 #define SPAWNY	24
 
-#define MTS(n)	(n*SCALE)
+#define MTS(m)	(m*SCALE)
+#define STM(s)	(s/SCALE)
 
 char blocks[MAPY][MAPX] = {
 {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
