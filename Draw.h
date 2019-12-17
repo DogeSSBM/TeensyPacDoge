@@ -1,7 +1,14 @@
 #pragma once
 
-#define SCALE	(SCREENX / MAPX)
-#define HSCALE	(SCALE/2)
+void drawDot(uint x, uint y, bool power)
+{
+	screen.fillCircle(MTHS(x), MTHS(y), HSCALE/(power?2:3), YELLOW);
+}
+
+void drawWall(uint x, uint y)
+{
+	screen.fillRect(MTS(x)+HSCALE/2, MTS(y)+HSCALE/2, HSCALE, HSCALE, BLUE);
+}
 
 void drawMap(void)
 {
@@ -9,16 +16,16 @@ void drawMap(void)
 		for(uint x = 0; x < MAPX; x++){
 			switch(blocks[y][x]){
 				case '#':	// Wall
-					screen.fillRect(x*SCALE, y*SCALE, SCALE-1, SCALE-1, BLUE);
+					drawWall(x, y);
 					break;
 				case '.':	// Dot
-					screen.fillCircle(x*SCALE+HSCALE, y*SCALE+HSCALE, HSCALE/3, YELLOW);
+					drawDot(x, y, false);
 					break;
 				case '@':	// Power Dot
-					screen.fillCircle(x*SCALE+HSCALE, y*SCALE+HSCALE, HSCALE/2, YELLOW);
+					drawDot(x, y, true);
 					break;
 				case '0':	// Warp
-					screen.fillRect(x*SCALE, y*SCALE, SCALE-1, SCALE-1, DARKGREY);
+					screen.fillRect(MTS(x), MTS(y), SCALE-1, SCALE-1, DARKGREY);
 					break;
 				case ' ':	// Empty
 				default:
@@ -29,25 +36,38 @@ void drawMap(void)
 	}
 }
 
-void drawGhosts()
+void drawMask(const uint x, const uint y, bool m[][SCALE])
+{
+	for(uint yoff = 0; yoff < SCALE; yoff++){
+		for(uint xoff = 0; xoff < SCALE; xoff++){
+			if(m[yoff][xoff])
+				drawPixel(x+xoff,y+yoff);
+		}
+	}
+}
+
+void drawGhosts(void)
 {
 	for(uint i = 0; i < GHOSTSNUM; i++){
-		setColor(ghosts[i].color);
-		bool lr = ghosts[i].facing == DIR_R || ghosts[i].facing == DIR_L;
-		uint sx = HSCALE-1+MTS(ghosts[i].x);
-		uint sy = HSCALE-1+MTS(ghosts[i].y);
-		lr? sx+=ghosts[i].offset : sy+=ghosts[i].offset;
-		fillCircle(sx,sy,HSCALE-1);
-		fillRect(sx-4,sy,SCALE,HSCALE);
+		if(ghosts[i].x == ghosts[i].lastx && ghosts[i].y == ghosts[i].lasty)
+			continue;
+		setColor(BLACK);
+		drawMask(ghosts[i].lastx, ghosts[i].lasty, ghostMask);
+		setColor(player.power?BLUE:ghosts[i].color);
+		drawMask(ghosts[i].x, ghosts[i].y, ghostMask);
 	}
+	for(uint i = 0; i < SCALE; i++)
+		ghostMask[SCALE-1][i]=ghostMask[SCALE-1][(i+1)%SCALE];
 }
 
 void drawPlayer(void)
 {
+	static u8 cycle = 0;
+	if(player.x == player.lastx && player.y == player.lasty)
+		return;
+	setColor(BLACK);
+	drawMask(player.lastx, player.lasty, playerMask);
 	setColor(YELLOW);
-	bool lr = player.facing == DIR_R || player.facing == DIR_L;
-	uint sx = HSCALE-1+MTS(player.x);
-	uint sy = HSCALE-1+MTS(player.y);
-	lr? sx+=player.offset : sy+=player.offset;
-	fillCircle(sx,sy,HSCALE-1);
+	drawMask(player.x, player.y, playerMask);
+	cycle = (cycle+1)%3;
 }

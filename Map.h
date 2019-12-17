@@ -6,7 +6,10 @@ extern "C"{
 #define SPAWNX	14
 #define SPAWNY	24
 
+#define NUMDOT	294
+
 #define MTS(m)	(m*SCALE)
+#define MTHS(m)	(m*SCALE+HSCALE)
 #define STM(s)	(s/SCALE)
 
 char blocks[MAPY][MAPX] = {

@@ -5,12 +5,11 @@ void setup()
 	screenInit();
 	btnInit();
 
-	drawMap();
 	drawPlayer();
 	drawGhosts();
 }
 
 void loop()
 {
-	delay(5);
+	delay(250);
 }
