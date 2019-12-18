@@ -53,9 +53,24 @@ void fillCircle(const uint x, const uint y, const uint radius)
 	screen.fillCircle(x, y, radius, drawColor);
 }
 
+uint getCursorX(void)
+{
+	return screen.getCursorX();
+}
+
+uint getCursorY(void)
+{
+	return screen.getCursorY();
+}
+
 uint getTextSize(void)
 {
 	return screen.getTextSize();
+}
+
+void setTextSize(const uint s)
+{
+	screen.setTextSize(s);
 }
 
 void setCursor(const uint x, const uint y)
@@ -63,9 +78,22 @@ void setCursor(const uint x, const uint y)
 	screen.setCursor(x, y);
 }
 
+void setCharCursor(const uint x, const uint y)
+{
+	const uint s = getTextSize()*8;
+	setCursor(x*s, x*y);
+}
+
 void setLine(const uint l)
 {
 	screen.setCursor(0, l*getTextSize()*8);
+}
+
+void setClearLine(const uint l)
+{
+	screen.setCursor(0, l*getTextSize()*8);
+	setColor(BLACK);
+	fillRect(getCursorX(), getCursorY(), SCREENX, getTextSize()*8);
 }
 
 uint numLines(void)

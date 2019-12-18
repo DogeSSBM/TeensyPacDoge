@@ -7,7 +7,7 @@
 #define EYEL	2
 #define EYER	4
 
-typedef enum{DIR_U=0, DIR_R, DIR_D, DIR_L}Direction;
+typedef enum{DIR_U=0, DIR_D, DIR_L, DIR_R}Direction;
 
 #include "Player.h"
 #include "Ghost.h"
@@ -33,56 +33,111 @@ void removeAt(const uint x, const uint y)
 	blocks[STM(y)][STM(x)] = ' ';
 }
 
+/* PSX = Player screen tile X, PTX = Player tile X */
+void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty)
+{
+	setTextSize(1);
+	setClearLine(numLines()-4);
+	screen.print("Psx: ");	screen.println(Psx);
+	screen.print("Psy: ");	screen.println(Psy);
+	screen.print("Ptx: ");	screen.println(Ptx);
+	screen.print("Pty: ");	screen.println(Pty);
+
+	setLine(numLines()-4);
+}
+
 void movePlayer(void)
 {
 	player.power -= player.power>0;
 	player.lastx = player.x;
 	player.lasty = player.y;
-	uint newx = player.x;
-	uint newy = player.y;
+
+	uint tilex = STM(player.x+HSCALE);
+	uint tiley = STM(player.y+HSCALE);
+
+	uint nextTilex = tilex;
+	uint nextTiley = tiley;
+
+	char nextTile = blocks[tiley][tilex];
+
+	setColor(GREEN);
+	fillSquare(MTS(tilex), MTS(tiley), SCALE);
+
 	switch (player.facing) {
 		case DIR_R:
-			newx+=player.speed;
+			player.x+=player.speed;
+			nextTilex+=player.speed;
 			break;
 		case DIR_L:
-			newx-=player.speed;
+			player.x-=player.speed;
+			nextTilex-=player.speed;
 			break;
 		case DIR_U:
-			newy-=player.speed;
+			player.y-=player.speed;
+			nextTiley-=player.speed;
 			break;
 		case DIR_D:
-			newy+=player.speed;
+			player.y+=player.speed;
+			nextTiley+=player.speed;
 			break;
 	}
-	switch (whatAt(newx,newy)) {
-		case '#':	// Wall
-			return;
-			break;
-		case '.':	// Dot
-			removeAt(newx,newy);
-			player.dots++;
-			break;
-		case '@':	// Power Dot
-			removeAt(newx,newy);
-			player.dots++;
-			player.power = 100;
-			break;
-		case '0':	// Warp
-			if(newx==0 && player.facing==DIR_L){
-				newx = MTS(MAPX-1);
-				break;
-			}
-			if(newx==MTS(MAPX-1) && player.facing==DIR_R){
-				newx = 0;
-				break;
-			}
-		default:
-		case ' ':	// Empty
-			break;
-	}
-	player.x = newx;
-	player.y = newy;
+
+	setColor(RED);
+	fillSquare(MTS(nextTilex), MTS(nextTiley), SCALE);
 }
+
+// void movePlayer(void)
+// {
+// 	player.power -= player.power>0;
+// 	player.lastx = player.x;
+// 	player.lasty = player.y;
+// 	uint newx = player.x;
+// 	uint newy = player.y;
+// 	switch (player.facing) {
+// 		case DIR_R:
+// 			newx+=player.speed;
+// 			break;
+// 		case DIR_L:
+// 			newx-=player.speed;
+// 			break;
+// 		case DIR_U:
+// 			newy-=player.speed;
+// 			break;
+// 		case DIR_D:
+// 			newy+=player.speed;
+// 			break;
+// 	}
+// 	setColor(RED);
+// 	drawSquare(MTS(STM(newx)), MTS(STM(newy)), SCALE);
+// 	switch (whatAt(newx+HSCALE,newy+HSCALE)) {
+// 		case '#':	// Wall
+// 			return;
+// 			break;
+// 		case '.':	// Dot
+// 			removeAt(newx,newy);
+// 			player.dots++;
+// 			break;
+// 		case '@':	// Power Dot
+// 			removeAt(newx,newy);
+// 			player.dots++;
+// 			player.power = 100;
+// 			break;
+// 		case '0':	// Warp
+// 			if(newx==0 && player.facing==DIR_L){
+// 				newx = MTS(MAPX-1);
+// 				break;
+// 			}
+// 			if(newx==MTS(MAPX-1) && player.facing==DIR_R){
+// 				newx = 0;
+// 				break;
+// 			}
+// 		default:
+// 		case ' ':	// Empty
+// 			break;
+// 	}
+// 	player.x = newx;
+// 	player.y = newy;
+// }
 
 void moveGhosts(void)
 {

@@ -22,11 +22,14 @@ void loop()
 	Epoch elapsed;
 	inputs();
 
+	//screenBlank();
+	//drawMap();
+
 	moveGhosts();
 	drawGhosts();
 
 	movePlayer();
-	drawPlayer();
+	//drawPlayer();
 
 	while(elapsed < FRAMETIME);
 }
