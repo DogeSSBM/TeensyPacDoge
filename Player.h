@@ -6,18 +6,19 @@ typedef struct{
 	uint lives;
 	uint speed;
 	Direction facing;
+	Direction turn;
 	uint power;
 	uint dots;
-	// bool mask[SCALE][SCALE];
 }Player;
 
 Player player={
 	MTS(14),
-	MTS(14),
+	MTS(0),
 	MTS(17),
-	MTS(17),
+	MTS(0),
 	3,
 	1,
+	DIR_L,
 	DIR_L,
 	0,
 	0

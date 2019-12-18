@@ -12,6 +12,17 @@ typedef enum{DIR_U=0, DIR_R, DIR_D, DIR_L}Direction;
 #include "Player.h"
 #include "Ghost.h"
 
+const bool fillMask[SCALE][SCALE] = {
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1}
+};
+
 char whatAt(const uint x, const uint y)
 {
 	return blocks[STM(y)][STM(x)];
@@ -44,7 +55,6 @@ void movePlayer(void)
 			break;
 	}
 	switch (whatAt(newx,newy)) {
-		default:
 		case '#':	// Wall
 			return;
 			break;
@@ -58,8 +68,15 @@ void movePlayer(void)
 			player.power = 100;
 			break;
 		case '0':	// Warp
-			player.x = player.x == 0 ? MTS(MAPX-1) : 0;
-			break;
+			if(newx==0 && player.facing==DIR_L){
+				newx = MTS(MAPX-1);
+				break;
+			}
+			if(newx==MTS(MAPX-1) && player.facing==DIR_R){
+				newx = 0;
+				break;
+			}
+		default:
 		case ' ':	// Empty
 			break;
 	}
@@ -69,5 +86,44 @@ void movePlayer(void)
 
 void moveGhosts(void)
 {
-
+	for(uint i = 0; i < GHOSTSNUM; i++){
+		ghosts[i].lastx = ghosts[i].x;
+		ghosts[i].lasty = ghosts[i].y;
+		uint newx = ghosts[i].x;
+		uint newy = ghosts[i].y;
+		switch (ghosts[i].facing) {
+			case DIR_R:
+				newx+=ghosts[i].speed;
+				break;
+			case DIR_L:
+				newx-=ghosts[i].speed;
+				break;
+			case DIR_U:
+				newy-=ghosts[i].speed;
+				break;
+			case DIR_D:
+				newy+=ghosts[i].speed;
+				break;
+		}
+		switch (whatAt(newx,newy)) {
+			case '#':	// Wall
+				return;
+				break;
+			case '0':	// Warp
+				if(newx==0 && ghosts[i].facing==DIR_L){
+					newx = MTS(MAPX-1);
+					break;
+				}
+				if(newx==MTS(MAPX-1) && ghosts[i].facing==DIR_R){
+					newx = 0;
+					break;
+				}
+				break;
+			default:
+			case ' ':	// Empty
+				break;
+		}
+		ghosts[i].x = newx;
+		ghosts[i].y = newy;
+	}
 }

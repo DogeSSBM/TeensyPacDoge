@@ -7,14 +7,15 @@ typedef struct{
 	uint y, lasty;
 	uint speed;
 	Direction facing;
+	Direction turn;
 	Color color;
 }Ghost;
 
 Ghost ghosts[GHOSTSNUM] = {
-	{MTS(12), MTS(12), 0, 0, 1, DIR_L, CYAN},
-	{MTS(13), MTS(13), 0, 0, 1, DIR_R, RED},
-	{MTS(14), MTS(14), 0, 0, 1, DIR_U, PINK},
-	{MTS(15), MTS(15), 0, 0, 1, DIR_D, ORANGE}
+	{MTS(12), 0, MTS(11), 0, 1, DIR_L, DIR_D, CYAN},
+	{MTS(13), 0, MTS(11), 0, 1, DIR_L, DIR_U, RED},
+	{MTS(14), 0, MTS(11), 0, 1, DIR_R, DIR_U, PINK},
+	{MTS(15), 0, MTS(11), 0, 1, DIR_R, DIR_D, ORANGE}
 };
 
 bool ghostMask[SCALE][SCALE] = {

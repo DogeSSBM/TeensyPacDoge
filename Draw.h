@@ -36,7 +36,7 @@ void drawMap(void)
 	}
 }
 
-void drawMask(const uint x, const uint y, bool m[][SCALE])
+void drawMask(const uint x, const uint y, const bool m[][SCALE])
 {
 	for(uint yoff = 0; yoff < SCALE; yoff++){
 		for(uint xoff = 0; xoff < SCALE; xoff++){
@@ -49,10 +49,10 @@ void drawMask(const uint x, const uint y, bool m[][SCALE])
 void drawGhosts(void)
 {
 	for(uint i = 0; i < GHOSTSNUM; i++){
-		if(ghosts[i].x == ghosts[i].lastx && ghosts[i].y == ghosts[i].lasty)
-			continue;
+		// if(ghosts[i].x == ghosts[i].lastx && ghosts[i].y == ghosts[i].lasty)
+			// continue;
 		setColor(BLACK);
-		drawMask(ghosts[i].lastx, ghosts[i].lasty, ghostMask);
+		drawMask(ghosts[i].lastx, ghosts[i].lasty, fillMask);
 		setColor(player.power?BLUE:ghosts[i].color);
 		drawMask(ghosts[i].x, ghosts[i].y, ghostMask);
 	}

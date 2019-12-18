@@ -63,6 +63,16 @@ void setCursor(const uint x, const uint y)
 	screen.setCursor(x, y);
 }
 
+void setLine(const uint l)
+{
+	screen.setCursor(0, l*getTextSize()*8);
+}
+
+uint numLines(void)
+{
+	return SCREENY/(getTextSize()*8);
+}
+
 void printText(const char* text)
 {
 	screen.print(text);
