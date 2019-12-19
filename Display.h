@@ -1,7 +1,9 @@
 #pragma once
 
 #define SCREENX	240
+#define HSCREENX	(SCREENX/2)
 #define SCREENY	320
+#define HSCREENY	(SCREENY/2)
 #include "ILI9341_t3.h"
 #include "Colors.h"
 
@@ -71,6 +73,16 @@ uint getTextSize(void)
 void setTextSize(const uint s)
 {
 	screen.setTextSize(s);
+}
+
+void setCursorX(const uint x)
+{
+	screen.setCursor(x, getCursorY());
+}
+
+void setCursorY(const uint y)
+{
+	screen.setCursor(getCursorY(), y);
 }
 
 void setCursor(const uint x, const uint y)

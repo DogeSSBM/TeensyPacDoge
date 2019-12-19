@@ -34,7 +34,8 @@ void removeAt(const uint x, const uint y)
 }
 
 /* PSX = Player screen tile X, PTX = Player tile X */
-void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty)
+void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty,
+		const uint Ntx, const uint Nty, const char nt)
 {
 	setTextSize(1);
 	setClearLine(numLines()-4);
@@ -44,6 +45,12 @@ void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty)
 	screen.print("Pty: ");	screen.println(Pty);
 
 	setLine(numLines()-4);
+	setCursorX(HSCREENX);
+	screen.print("Ntx: ");	screen.println(Ntx);
+	setCursorX(HSCREENX);
+	screen.print("Nty: ");	screen.println(Nty);
+	setCursorX(HSCREENX);
+	screen.print("nt:  ");	screen.println(nt);
 }
 
 void movePlayer(void)
@@ -84,6 +91,7 @@ void movePlayer(void)
 
 	setColor(RED);
 	fillSquare(MTS(nextTilex), MTS(nextTiley), SCALE);
+	msg(player.x, player.y, tilex, tiley, nextTilex, nextTiley, nextTile);
 }
 
 // void movePlayer(void)
