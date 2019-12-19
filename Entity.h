@@ -35,22 +35,26 @@ void removeAt(const uint x, const uint y)
 
 /* PSX = Player screen tile X, PTX = Player tile X */
 void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty,
-		const uint Ntx, const uint Nty, const char nt)
+		const uint Ntx, const uint Nty, const char pt, const char nt)
 {
 	setTextSize(1);
-	setClearLine(numLines()-4);
-	screen.print("Psx: ");	screen.println(Psx);
-	screen.print("Psy: ");	screen.println(Psy);
-	screen.print("Ptx: ");	screen.println(Ptx);
-	screen.print("Pty: ");	screen.println(Pty);
+	for(uint i = 0; i < 4; i++)
+		setClearLine(numLines()-i);
+
+	screen.print("PlayerScreenX: ");	screen.println(Psx);
+	screen.print("PlayerScreeny: ");	screen.println(Psy);
+	screen.print("PlayerTileX: ");	screen.println(Ptx);
+	screen.print("PlayerTileY: ");	screen.println(Pty);
 
 	setLine(numLines()-4);
 	setCursorX(HSCREENX);
-	screen.print("Ntx: ");	screen.println(Ntx);
+	screen.print("NextTileX: ");	screen.println(Ntx);
 	setCursorX(HSCREENX);
-	screen.print("Nty: ");	screen.println(Nty);
+	screen.print("NextTileY: ");	screen.println(Nty);
 	setCursorX(HSCREENX);
-	screen.print("nt:  ");	screen.println(nt);
+	screen.print("PlayerTile:  ");	screen.println(pt);
+	setCursorX(HSCREENX);
+	screen.print("NextTile:  ");	screen.println(nt);
 }
 
 void movePlayer(void)
@@ -59,16 +63,17 @@ void movePlayer(void)
 	player.lastx = player.x;
 	player.lasty = player.y;
 
-	uint tilex = STM(player.x+HSCALE);
-	uint tiley = STM(player.y+HSCALE);
+	uint tilex = STM(player.x);
+	uint tiley = STM(player.y);
 
 	uint nextTilex = tilex;
 	uint nextTiley = tiley;
 
-	char nextTile = blocks[tiley][tilex];
+	char playerTile = blocks[tiley][tilex];
+	char nextTile = playerTile;
 
 	setColor(GREEN);
-	fillSquare(MTS(tilex), MTS(tiley), SCALE);
+	drawSquare(MTS(tilex), MTS(tiley), SCALE);
 
 	switch (player.facing) {
 		case DIR_R:
@@ -90,8 +95,8 @@ void movePlayer(void)
 	}
 
 	setColor(RED);
-	fillSquare(MTS(nextTilex), MTS(nextTiley), SCALE);
-	msg(player.x, player.y, tilex, tiley, nextTilex, nextTiley, nextTile);
+	drawSquare(MTS(nextTilex), MTS(nextTiley), SCALE);
+	msg(player.x, player.y, tilex, tiley, nextTilex, nextTiley, playerTile, nextTile);
 }
 
 // void movePlayer(void)
