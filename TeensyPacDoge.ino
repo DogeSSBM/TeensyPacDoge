@@ -14,6 +14,7 @@ void setup()
 	btnPressed.btnA = false;
 	screenBlank();
 	drawMap();
+	setTextSize(1);
 }
 
 #define FRAMETIME	(1000/30)
@@ -29,7 +30,9 @@ void loop()
 	drawGhosts();
 
 	movePlayer();
-	//drawPlayer();
+	drawPlayer();
+
+	//showPressed();
 
 	while(elapsed < FRAMETIME);
 }

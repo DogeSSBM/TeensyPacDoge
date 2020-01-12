@@ -75,6 +75,11 @@ void setTextSize(const uint s)
 	screen.setTextSize(s);
 }
 
+uint screenToLine(const uint s)
+{
+	return s/(getTextSize()*8);
+}
+
 void setCursorX(const uint x)
 {
 	screen.setCursor(x, getCursorY());
@@ -111,6 +116,11 @@ void setClearLine(const uint l)
 uint numLines(void)
 {
 	return SCREENY/(getTextSize()*8);
+}
+
+void setClearLineBottom(const uint l)
+{
+	setClearLine(numLines()-(1+l));
 }
 
 void printText(const char* text)
@@ -158,7 +168,8 @@ void screenBlank(void)
 void screenInit(void)
 {
 	screen.begin();
+	screenBlank();
 	screen.setTextSize(3);
 	screen.setTextColor(WHITE);
-	screenBlank();
+	setColor(WHITE);
 }

@@ -1,13 +1,11 @@
 #pragma once
-#define SCALE	(SCREENX / MAPX)
-#define HSCALE	(SCALE/2)
+extern "C"{
 
-
-#define EYEY	2
-#define EYEL	2
-#define EYER	4
-
-typedef enum{DIR_U=0, DIR_D, DIR_L, DIR_R}Direction;
+typedef enum{DIR_U=0, DIR_R, DIR_D, DIR_L}Direction;
+#define INVERT(d)	((Direction)((d+2)%4))
+#define UD(d)	(~(d)&1)
+#define LR(d)	( (d)&1)
+#define ALIGNED(s)(!(s%SCALE))
 
 #include "Player.h"
 #include "Ghost.h"
@@ -28,129 +26,166 @@ char whatAt(const uint x, const uint y)
 	return blocks[STM(y)][STM(x)];
 }
 
+bool traversable(const char t)
+{
+	return t!='#' && t!='g';
+}
+
 void removeAt(const uint x, const uint y)
 {
 	blocks[STM(y)][STM(x)] = ' ';
 }
 
-/* PSX = Player screen tile X, PTX = Player tile X */
-void msg(const uint Psx, const uint Psy, const uint Ptx, const uint Pty,
-		const uint Ntx, const uint Nty, const char pt, const char nt)
+void playerMsg(const uint x, const uint y, const uint nextx, const uint nexty)
 {
 	setTextSize(1);
-	for(uint i = 0; i < 4; i++)
+	for(uint i = 1; i < 6; i++)
 		setClearLine(numLines()-i);
 
-	screen.print("PlayerScreenX: ");	screen.println(Psx);
-	screen.print("PlayerScreeny: ");	screen.println(Psy);
-	screen.print("PlayerTileX: ");	screen.println(Ptx);
-	screen.print("PlayerTileY: ");	screen.println(Pty);
+	setLine(numLines()-6);
+	screen.println("Player");
+	screen.print("x: ");		screen.println(x);
+	screen.print("y: ");		screen.println(y);
+	screen.print("next x: ");	screen.println(nextx);
+	screen.print("next y: ");	screen.println(nexty);
+}
 
-	setLine(numLines()-4);
+void tileMsg(const uint x, const uint y, const uint nextx, const uint nexty)
+{
+	setLine(numLines()-6);
 	setCursorX(HSCREENX);
-	screen.print("NextTileX: ");	screen.println(Ntx);
+	screen.println("Tile");
 	setCursorX(HSCREENX);
-	screen.print("NextTileY: ");	screen.println(Nty);
+	screen.print("x: ");		screen.println(x);
 	setCursorX(HSCREENX);
-	screen.print("PlayerTile:  ");	screen.println(pt);
+	screen.print("y: ");		screen.println(y);
 	setCursorX(HSCREENX);
-	screen.print("NextTile:  ");	screen.println(nt);
+	screen.print("next x: ");	screen.println(nextx);
+	setCursorX(HSCREENX);
+	screen.print("next y: ");	screen.println(nexty);
+}
+
+bool gridAligned(const uint x, const uint y)
+{
+	return ALIGNED(x) && ALIGNED(y);
+}
+
+void turnPlayer(void)
+{
+	volatile bool* dirBtn[] = {
+			&btnState.btnU,
+			&btnState.btnR,
+			&btnState.btnD,
+			&btnState.btnL
+		};
+	Direction turn = player.facing;
+
+	if(UD(player.facing)){
+		if(ALIGNED(player.y)){
+		if(btnState.btnL && !btnState.inverse.btnL){
+			if(traversable(
+				whatAt(STM(player.x)-1, STM(player.y))
+			)){
+				turn = DIR_L;
+			}
+		}else if(btnState.btnR && !btnState.inverse.btnR){
+			if(traversable(
+				whatAt(OSTM(player.x)+1, STM(player.y))
+			)){
+				turn = DIR_R;
+			}
+		}
+		if(turn == player.facing){
+			if(*dirBtn[INVERT(player.facing)] &&
+			!(*dirBtn[player.facing])){
+				turn = INVERT(turn);
+			}
+		}
+		}
+	}
+
+	if(LR(player.facing)){
+		if(ALIGNED(player.x)){
+		if(btnState.btnU && !btnState.inverse.btnU){
+			if(traversable(
+				whatAt(STM(player.x), STM(player.y)-1)
+			)){
+				turn = DIR_U;
+			}
+		}else if(btnState.btnD && !btnState.inverse.btnD){
+			if(traversable(
+				whatAt(STM(player.x), OSTM(player.y)+1)
+			)){
+				turn = DIR_D;
+			}
+		}
+		if(turn == player.facing){
+			if(*dirBtn[INVERT(player.facing)] &&
+			!(*dirBtn[player.facing])){
+				turn = INVERT(turn);
+			}
+		}
+		}
+	}
+
+	player.facing = turn;
 }
 
 void movePlayer(void)
 {
+	turnPlayer();
+
 	player.power -= player.power>0;
 	player.lastx = player.x;
 	player.lasty = player.y;
 
-	uint tilex = STM(player.x);
-	uint tiley = STM(player.y);
+	uint nextPlayerx = player.x;
+	uint nextPlayery = player.y;
+
+	uint tilex = player.x;
+	uint tiley = player.y;
 
 	uint nextTilex = tilex;
 	uint nextTiley = tiley;
-
-	char playerTile = blocks[tiley][tilex];
-	char nextTile = playerTile;
-
-	setColor(GREEN);
-	drawSquare(MTS(tilex), MTS(tiley), SCALE);
-
-	switch (player.facing) {
+	switch (player.facing){
 		case DIR_R:
-			player.x+=player.speed;
-			nextTilex+=player.speed;
+			nextPlayerx+=1;
+			nextTilex = OSTM(nextPlayerx);
+			nextTiley = STM(nextPlayery);
 			break;
 		case DIR_L:
-			player.x-=player.speed;
-			nextTilex-=player.speed;
+			nextPlayerx-=1;
+			nextTilex = STM(nextPlayerx);
+			nextTiley = STM(nextPlayery);
 			break;
 		case DIR_U:
-			player.y-=player.speed;
-			nextTiley-=player.speed;
+			nextPlayery-=1;
+			nextTilex = STM(nextPlayerx);
+			nextTiley = STM(nextPlayery);
 			break;
 		case DIR_D:
-			player.y+=player.speed;
-			nextTiley+=player.speed;
+			nextPlayery+=1;
+			nextTilex = STM(nextPlayerx);
+			nextTiley = OSTM(nextPlayery);
 			break;
 	}
 
-	setColor(RED);
-	drawSquare(MTS(nextTilex), MTS(nextTiley), SCALE);
-	msg(player.x, player.y, tilex, tiley, nextTilex, nextTiley, playerTile, nextTile);
-}
+	if(traversable(whatAt(nextTilex, nextTiley))){
+		player.x = nextPlayerx;
+		player.y = nextPlayery;
+	}
+	// if trying to turn and turnable check potential tile
+	// change facing if valid next tile
 
-// void movePlayer(void)
-// {
-// 	player.power -= player.power>0;
-// 	player.lastx = player.x;
-// 	player.lasty = player.y;
-// 	uint newx = player.x;
-// 	uint newy = player.y;
-// 	switch (player.facing) {
-// 		case DIR_R:
-// 			newx+=player.speed;
-// 			break;
-// 		case DIR_L:
-// 			newx-=player.speed;
-// 			break;
-// 		case DIR_U:
-// 			newy-=player.speed;
-// 			break;
-// 		case DIR_D:
-// 			newy+=player.speed;
-// 			break;
-// 	}
-// 	setColor(RED);
-// 	drawSquare(MTS(STM(newx)), MTS(STM(newy)), SCALE);
-// 	switch (whatAt(newx+HSCALE,newy+HSCALE)) {
-// 		case '#':	// Wall
-// 			return;
-// 			break;
-// 		case '.':	// Dot
-// 			removeAt(newx,newy);
-// 			player.dots++;
-// 			break;
-// 		case '@':	// Power Dot
-// 			removeAt(newx,newy);
-// 			player.dots++;
-// 			player.power = 100;
-// 			break;
-// 		case '0':	// Warp
-// 			if(newx==0 && player.facing==DIR_L){
-// 				newx = MTS(MAPX-1);
-// 				break;
-// 			}
-// 			if(newx==MTS(MAPX-1) && player.facing==DIR_R){
-// 				newx = 0;
-// 				break;
-// 			}
-// 		default:
-// 		case ' ':	// Empty
-// 			break;
-// 	}
-// 	player.x = newx;
-// 	player.y = newy;
-// }
+	// find next x and y
+	// find next tile x and y
+	// if valid move, update player x and y (warp if necessesarry)
+	// check ghost colissions
+
+
+	playerMsg(player.x, player.y, nextPlayerx, nextPlayery);
+	tileMsg(tilex, tiley, nextTilex, nextTiley);
+}
 
 void moveGhosts(void)
 {
@@ -195,3 +230,5 @@ void moveGhosts(void)
 		ghosts[i].y = newy;
 	}
 }
+
+}// extern "C"

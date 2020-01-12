@@ -6,7 +6,6 @@ typedef struct{
 	uint lives;
 	uint speed;
 	Direction facing;
-	Direction turn;
 	uint power;
 	uint dots;
 }Player;
@@ -18,7 +17,6 @@ Player player={
 	MTS(0),
 	3,
 	1,
-	DIR_L,
 	DIR_L,
 	0,
 	0

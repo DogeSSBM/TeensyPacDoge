@@ -23,7 +23,17 @@ const union{
 		char btnB;
 		char btnA;
 	};
-}btnLabel;
+	struct{
+		char btnD;
+		char btnU;
+		char btnR;
+		char btnL;
+		char btn2;
+		char btn1;
+		char btnA;
+		char btnB;
+	}inverse;
+}btnLabel = {'U','D','L','R','1','2','B','A'};
 
 const union{
 	uint arr[BTNNUM] = {16,17,18,19,8,7,6,5};
@@ -37,7 +47,17 @@ const union{
 		uint btnB;
 		uint btnA;
 	};
-}btnPin;
+	struct{
+		uint btnD;
+		uint btnU;
+		uint btnR;
+		uint btnL;
+		uint btn2;
+		uint btn1;
+		uint btnA;
+		uint btnB;
+	}inverse;
+}btnPin = {16,17,18,19,8,7,6,5};
 
 volatile union{
 	bool arr[BTNNUM];
@@ -51,6 +71,16 @@ volatile union{
 		bool btnB;
 		bool btnA;
 	};
+	struct{
+		bool btnD;
+		bool btnU;
+		bool btnR;
+		bool btnL;
+		bool btn2;
+		bool btn1;
+		bool btnA;
+		bool btnB;
+	}inverse;
 }btnState;
 
 volatile union{
@@ -65,6 +95,16 @@ volatile union{
 		bool btnB;
 		bool btnA;
 	};
+	struct{
+		bool btnD;
+		bool btnU;
+		bool btnR;
+		bool btnL;
+		bool btn2;
+		bool btn1;
+		bool btnA;
+		bool btnB;
+	}inverse;
 }btnPressed;
 
 void onPress(void)
@@ -93,12 +133,19 @@ void showPressed(void)
 	}
 }
 
+void clearPressed(void)
+{
+	for(uint i = 0; i < BTNNUM; i++)
+		btnPressed.arr[i] = false;
+}
+
 void btnInit(void)
 {
 	for(uint i = 0; i < BTNNUM; i++) {
 		pinMode(btnPin.arr[i], INPUT_PULLUP);
 		attachInterrupt(btnPin.arr[i], onPress, CHANGE);
 	}
+	clearPressed();
 }
 
 } // extern "C"

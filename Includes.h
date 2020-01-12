@@ -7,4 +7,5 @@
 #include "Buttons.h"
 #include "Entity.h"
 #include "Draw.h"
+#include "Reset.h"
 #include "Inputs.h"
