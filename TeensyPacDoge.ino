@@ -17,20 +17,20 @@ void setup()
 	setTextSize(1);
 }
 
-#define FRAMETIME	(1000/60)
+#define FRAMETIME	(1000/30)
 void loop()
 {
 	Epoch elapsed;
 	inputs();
 
-	screenBlank();
-	drawMap();
+	//screenBlank();
+	//drawMap();
 
 	moveGhosts();
 	drawGhosts();
 
-	movePlayer();
 	drawPlayer();
+	movePlayer();
 
 	//showPressed();
 

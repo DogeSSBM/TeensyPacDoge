@@ -2,6 +2,23 @@
 extern "C"{
 
 typedef enum{DIR_U=0, DIR_R, DIR_D, DIR_L}Direction;
+
+typedef union{
+	bool arr[4];
+	struct{
+		bool dirU;
+		bool dirR;
+		bool dirD;
+		bool dirL;
+	};
+	struct{
+		bool dirD;
+		bool dirL;
+		bool dirU;
+		bool dirR;
+	}inverse;
+}AdjDir;
+
 #define INVERT(d)	((Direction)((d+2)%4))
 #define UD(d)	(~(d)&1)
 #define LR(d)	( (d)&1)
@@ -21,7 +38,12 @@ const bool fillMask[SCALE][SCALE] = {
 	{1,1,1,1,1,1,1,1}
 };
 
-char whatAt(const uint x, const uint y)
+char whatsAtM(const uint x, const uint y)
+{
+	return blocks[x][y];
+}
+
+char whatsAtS(const uint x, const uint y)
 {
 	return blocks[STM(y)][STM(x)];
 }
@@ -70,67 +92,104 @@ bool gridAligned(const uint x, const uint y)
 	return ALIGNED(x) && ALIGNED(y);
 }
 
-void turnPlayer(void)
+bool checkBounds(const uint x, const uint y)
 {
+	bool ret =
+	 	traversable(whatsAtS(x,y)) &&
+		traversable(whatsAtS(x+SCALE-1, y)) &&
 
+		traversable(whatsAtS(x,y+SCALE-1)) &&
+		traversable(whatsAtS(x+SCALE-1, y+SCALE-1));
+	//setColor(ret?GREEN:RED);
+	return ret;
 }
 
-void outlineOffset(int xoff, int yoff)
+AdjDir validPlayerMoves(void)
 {
-	xoff = player.x+xoff*SCALE;
-	yoff = player.y+yoff*SCALE;
-	if(ALIGNED(xoff) || ALIGNED(yoff)){
-	setColor(traversable(whatAt(xoff,yoff))?GREEN:RED);
-	drawLine(player.x+HSCALE,player.y+HSCALE,xoff+HSCALE,yoff+HSCALE);
-	}
+	AdjDir ret = {0};
+
+	ret.dirU = checkBounds(player.x,player.y-1);
+	// drawLine(
+		// player.x+HSCALE,player.y-HSCALE,
+		// player.x+HSCALE,player.y);
+
+	ret.dirR = checkBounds(player.x+1,player.y);
+	// drawLine(
+		// player.x+SCALE,player.y+HSCALE,
+		// player.x+SCALE+HSCALE,player.y+HSCALE);
+
+	ret.dirD = checkBounds(player.x,player.y+1);
+	// drawLine(
+		// player.x+HSCALE,player.y+SCALE,
+		// player.x+HSCALE,player.y+SCALE+HSCALE);
+
+	ret.dirL = checkBounds(player.x-1,player.y);
+	// drawLine(
+		// player.x-HSCALE,player.y+HSCALE,
+		// player.x,player.y+HSCALE);
+
+	return ret;
 }
 
 void movePlayer(void)
 {
 	player.power -= player.power>0;
-
-	outlineOffset(0,1);
-	outlineOffset(1,0);
-	outlineOffset(0,-1);
-	outlineOffset(-1,0);
-
-	volatile bool* dirBtn[] = {
-		&btnState.btnU,
-		&btnState.btnR,
-		&btnState.btnD,
-		&btnState.btnL
-	};
-
-	volatile bool* idirBtn[] = {
-		&btnState.inverse.btnU,
-		&btnState.inverse.btnR,
-		&btnState.inverse.btnD,
-		&btnState.inverse.btnL
-	};
-
-	if(*idirBtn[player.facing]&& !(*dirBtn[player.facing]))
-		player.facing = INVERT(player.facing);
-	else if(*idirBtn[(player.facing+1)%4]&& !(*dirBtn[(player.facing+1)%4]))
-		player.facing = INVERT((player.facing+1)%4);
-	else if(*idirBtn[(player.facing+3)%4]&& !(*dirBtn[(player.facing+3)%4]))
-		player.facing = INVERT((player.facing+3)%4);
-	switch (player.facing){
-		case DIR_R:
-			player.x+=1;
-			break;
-		case DIR_L:
-			player.x-=1;
-			break;
-		case DIR_D:
-			player.y+=1;
-			break;
-		case DIR_U:
-			player.y-=1;
-			break;
-	}
-
 	player.lastx = player.x;
 	player.lasty = player.y;
+
+	AdjDir validAdj = validPlayerMoves();
+	AdjDir tryAdj = {0};
+	tryAdj.dirU = btnState.btnU && !btnState.inverse.btnU;
+	tryAdj.dirR = btnState.btnR && !btnState.inverse.btnR;
+	tryAdj.dirD = btnState.btnD && !btnState.inverse.btnD;
+	tryAdj.dirL = btnState.btnL && !btnState.inverse.btnL;
+
+	if(UD(player.facing)){
+		if(tryAdj.dirL && validAdj.dirL){
+			player.facing = DIR_L;
+		}else if(tryAdj.dirR && validAdj.dirR){
+			player.facing = DIR_R;
+		}else{
+			if(player.facing == DIR_U &&
+				tryAdj.dirD && validAdj.dirD){
+				player.facing = DIR_D;
+			}else if(player.facing == DIR_D &&
+				tryAdj.dirU && validAdj.dirU){
+				player.facing = DIR_U;
+			}
+		}
+	}else{
+		if(tryAdj.dirU && validAdj.dirU){
+			player.facing = DIR_U;
+		}else if(tryAdj.dirD && validAdj.dirD){
+			player.facing = DIR_D;
+		}else{
+			if(player.facing == DIR_L &&
+				tryAdj.dirR && validAdj.dirR){
+				player.facing = DIR_R;
+			}else if(player.facing == DIR_R &&
+				tryAdj.dirL && validAdj.dirL){
+				player.facing = DIR_L;
+			}
+		}
+	}
+
+	if(validAdj.arr[player.facing]){
+		switch(player.facing){
+			case DIR_U:
+				player.y--;
+				break;
+			case DIR_R:
+				player.x++;
+				break;
+			case DIR_D:
+				player.y++;
+				break;
+			case DIR_L:
+				player.x--;
+				break;
+		}
+	}
 }
 
 void moveGhosts(void)
@@ -154,7 +213,7 @@ void moveGhosts(void)
 				newy+=ghosts[i].speed;
 				break;
 		}
-		switch (whatAt(newx,newy)) {
+		switch (whatsAtS(newx,newy)) {
 			case '#':	// Wall
 				return;
 				break;

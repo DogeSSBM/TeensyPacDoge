@@ -60,14 +60,23 @@ void drawGhosts(void)
 		ghostMask[SCALE-1][i]=ghostMask[SCALE-1][(i+1)%SCALE];
 }
 
+
 void drawPlayer(void)
 {
-	static u8 cycle = 0;
-	if(player.x == player.lastx && player.y == player.lasty)
-		return;
 	setColor(BLACK);
 	drawMask(player.lastx, player.lasty, playerMask);
 	setColor(YELLOW);
 	drawMask(player.x, player.y, playerMask);
-	cycle = (cycle+1)%3;
+	setColor(BLACK);
+	if(UD(player.facing)){
+		if(player.facing == DIR_U)
+			drawLine(player.x,player.y,player.x,player.y-SCALE);
+		else
+			drawLine(player.x,player.y,player.x,player.y+SCALE);
+	}else{
+		if(player.facing == DIR_L)
+			drawLine(player.x,player.y,player.x-SCALE,player.y);
+		else
+			drawLine(player.x,player.y,player.x+SCALE,player.y);
+	}
 }
