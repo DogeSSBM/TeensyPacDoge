@@ -7,12 +7,13 @@ void inputs(void)
 		btnPressed.btn2 = false;
 	}
 
-	if(btnPressed.btn1){
+	if(btnState.btn1){
 		setClearLine(screenToLine(MTS(MAPY)));
 		printText("Frame Advance");
 		btnPressed.btn1 = false;
-		while(btnState.btn1 );
-		delay(20);
+		btnPressed.btnB = false;
+		while(!btnPressed.btnB || !btnState.btnB);
+		delay(30);
 		setClearLine(screenToLine(MTS(MAPY)));
 	}
 }

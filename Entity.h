@@ -72,119 +72,65 @@ bool gridAligned(const uint x, const uint y)
 
 void turnPlayer(void)
 {
-	volatile bool* dirBtn[] = {
-			&btnState.btnU,
-			&btnState.btnR,
-			&btnState.btnD,
-			&btnState.btnL
-		};
-	Direction turn = player.facing;
 
-	if(UD(player.facing)){
-		if(ALIGNED(player.y)){
-		if(btnState.btnL && !btnState.inverse.btnL){
-			if(traversable(
-				whatAt(STM(player.x)-1, STM(player.y))
-			)){
-				turn = DIR_L;
-			}
-		}else if(btnState.btnR && !btnState.inverse.btnR){
-			if(traversable(
-				whatAt(OSTM(player.x)+1, STM(player.y))
-			)){
-				turn = DIR_R;
-			}
-		}
-		if(turn == player.facing){
-			if(*dirBtn[INVERT(player.facing)] &&
-			!(*dirBtn[player.facing])){
-				turn = INVERT(turn);
-			}
-		}
-		}
+}
+
+void outlineOffset(int xoff, int yoff)
+{
+	xoff = player.x+xoff*SCALE;
+	yoff = player.y+yoff*SCALE;
+	if(ALIGNED(xoff) || ALIGNED(yoff)){
+	setColor(traversable(whatAt(xoff,yoff))?GREEN:RED);
+	drawLine(player.x+HSCALE,player.y+HSCALE,xoff+HSCALE,yoff+HSCALE);
 	}
-
-	if(LR(player.facing)){
-		if(ALIGNED(player.x)){
-		if(btnState.btnU && !btnState.inverse.btnU){
-			if(traversable(
-				whatAt(STM(player.x), STM(player.y)-1)
-			)){
-				turn = DIR_U;
-			}
-		}else if(btnState.btnD && !btnState.inverse.btnD){
-			if(traversable(
-				whatAt(STM(player.x), OSTM(player.y)+1)
-			)){
-				turn = DIR_D;
-			}
-		}
-		if(turn == player.facing){
-			if(*dirBtn[INVERT(player.facing)] &&
-			!(*dirBtn[player.facing])){
-				turn = INVERT(turn);
-			}
-		}
-		}
-	}
-
-	player.facing = turn;
 }
 
 void movePlayer(void)
 {
-	turnPlayer();
-
 	player.power -= player.power>0;
-	player.lastx = player.x;
-	player.lasty = player.y;
 
-	uint nextPlayerx = player.x;
-	uint nextPlayery = player.y;
+	outlineOffset(0,1);
+	outlineOffset(1,0);
+	outlineOffset(0,-1);
+	outlineOffset(-1,0);
 
-	uint tilex = player.x;
-	uint tiley = player.y;
+	volatile bool* dirBtn[] = {
+		&btnState.btnU,
+		&btnState.btnR,
+		&btnState.btnD,
+		&btnState.btnL
+	};
 
-	uint nextTilex = tilex;
-	uint nextTiley = tiley;
+	volatile bool* idirBtn[] = {
+		&btnState.inverse.btnU,
+		&btnState.inverse.btnR,
+		&btnState.inverse.btnD,
+		&btnState.inverse.btnL
+	};
+
+	if(*idirBtn[player.facing]&& !(*dirBtn[player.facing]))
+		player.facing = INVERT(player.facing);
+	else if(*idirBtn[(player.facing+1)%4]&& !(*dirBtn[(player.facing+1)%4]))
+		player.facing = INVERT((player.facing+1)%4);
+	else if(*idirBtn[(player.facing+3)%4]&& !(*dirBtn[(player.facing+3)%4]))
+		player.facing = INVERT((player.facing+3)%4);
 	switch (player.facing){
 		case DIR_R:
-			nextPlayerx+=1;
-			nextTilex = OSTM(nextPlayerx);
-			nextTiley = STM(nextPlayery);
+			player.x+=1;
 			break;
 		case DIR_L:
-			nextPlayerx-=1;
-			nextTilex = STM(nextPlayerx);
-			nextTiley = STM(nextPlayery);
-			break;
-		case DIR_U:
-			nextPlayery-=1;
-			nextTilex = STM(nextPlayerx);
-			nextTiley = STM(nextPlayery);
+			player.x-=1;
 			break;
 		case DIR_D:
-			nextPlayery+=1;
-			nextTilex = STM(nextPlayerx);
-			nextTiley = OSTM(nextPlayery);
+			player.y+=1;
+			break;
+		case DIR_U:
+			player.y-=1;
 			break;
 	}
 
-	if(traversable(whatAt(nextTilex, nextTiley))){
-		player.x = nextPlayerx;
-		player.y = nextPlayery;
-	}
-	// if trying to turn and turnable check potential tile
-	// change facing if valid next tile
-
-	// find next x and y
-	// find next tile x and y
-	// if valid move, update player x and y (warp if necessesarry)
-	// check ghost colissions
-
-
-	playerMsg(player.x, player.y, nextPlayerx, nextPlayery);
-	tileMsg(tilex, tiley, nextTilex, nextTiley);
+	player.lastx = player.x;
+	player.lasty = player.y;
 }
 
 void moveGhosts(void)
