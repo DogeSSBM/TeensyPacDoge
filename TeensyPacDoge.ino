@@ -24,11 +24,23 @@ void printStuff(void)
 	for(uint i = 1; i < 6; i++)
 		setClearLine(numLines()-i);
 
+	const static char dirChar[] {'U', 'R', 'D', 'L'};
+
 	setLine(numLines()-6);
 	screen.println("Player");
 	screen.print("X: ");		screen.println(player.x);
 	screen.print("Y: ");		screen.println(player.y);
-	screen.print("Dir: ");		screen.println(btnLabel.arr[player.facing]);
+	screen.print("Dir: ");		screen.println(dirChar[player.facing]);
+
+	setLine(numLines()-6);
+	setCursorX(HSCREENX/2);
+	screen.println("Tile");
+	setCursorX(HSCREENX/2);
+	screen.print("X: ");		screen.println((player.x+HSCALE)/SCALE);
+	setCursorX(HSCREENX/2);
+	screen.print("Y: ");		screen.println((player.y+HSCALE)/SCALE);
+	setCursorX(HSCREENX/2);
+	screen.print("Char: ");		screen.println(whatsAtS(player.x+HSCALE,player.y+HSCALE));
 
 	setLine(numLines()-6);
 	setCursorX(HSCREENX);
