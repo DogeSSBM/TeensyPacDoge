@@ -4,6 +4,9 @@ extern "C"{
 #define MAPX	28
 #define MAPY	31
 
+#define MAPSX	(MAPX*SCALE)
+#define MAPSY	(MAPY*SCALE)
+
 #define SCALE	(SCREENX / MAPX)
 #define HSCALE	(SCALE/2)
 

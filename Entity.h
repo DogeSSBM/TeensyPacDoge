@@ -58,35 +58,6 @@ void removeAt(const uint x, const uint y)
 	blocks[STM(y)][STM(x)] = ' ';
 }
 
-void playerMsg(const uint x, const uint y, const uint nextx, const uint nexty)
-{
-	setTextSize(1);
-	for(uint i = 1; i < 6; i++)
-		setClearLine(numLines()-i);
-
-	setLine(numLines()-6);
-	screen.println("Player");
-	screen.print("x: ");		screen.println(x);
-	screen.print("y: ");		screen.println(y);
-	screen.print("next x: ");	screen.println(nextx);
-	screen.print("next y: ");	screen.println(nexty);
-}
-
-void tileMsg(const uint x, const uint y, const uint nextx, const uint nexty)
-{
-	setLine(numLines()-6);
-	setCursorX(HSCREENX);
-	screen.println("Tile");
-	setCursorX(HSCREENX);
-	screen.print("x: ");		screen.println(x);
-	setCursorX(HSCREENX);
-	screen.print("y: ");		screen.println(y);
-	setCursorX(HSCREENX);
-	screen.print("next x: ");	screen.println(nextx);
-	setCursorX(HSCREENX);
-	screen.print("next y: ");	screen.println(nexty);
-}
-
 bool gridAligned(const uint x, const uint y)
 {
 	return ALIGNED(x) && ALIGNED(y);
@@ -189,6 +160,32 @@ void movePlayer(void)
 				player.x--;
 				break;
 		}
+	}
+}
+
+void collidePlayer(void)
+{
+	const uint x = player.x+HSCALE;
+	const uint y = player.y+HSCALE;
+	switch(whatsAtS(x, y)){
+		case '.':
+			removeAt(x,y);
+			player.dots++;
+			break;
+		case '@':
+			removeAt(x,y);
+			player.dots++;
+			player.power = 10*FPS;
+			break;
+		case '0':
+			if(player.facing == DIR_R && x > MAPSX/2){
+				player.x = SCALE+HSCALE;
+			}else if(player.facing == DIR_L && x < MAPSX/2){
+				player.x = MAPSX-(SCALE+HSCALE+1);
+			}
+		default:
+		case ' ':
+			break;
 	}
 }
 
