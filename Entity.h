@@ -19,9 +19,16 @@ typedef union{
 	}inverse;
 }AdjDir;
 
+// evaluates to the opposite direction INVERT(DIR_U) == DIR_D
 #define INVERT(d)	((Direction)((d+2)%4))
+
+// true if d is a vertical direction (DIR_U || DIR_D)
 #define UD(d)	(~(d)&1)
+
+// true if d is a horizontal direction (DIR_L || DIR_R)
 #define LR(d)	( (d)&1)
+
+// true if s is alligned with the map coordanates when scaled down
 #define ALIGNED(s)(!(s%SCALE))
 
 #include "Player.h"

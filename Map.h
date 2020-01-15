@@ -17,11 +17,12 @@ extern "C"{
 
 // converts a map tile coord to a screen position coord
 #define MTS(m)	(m*SCALE)
+
 // converts the middle a map tile coord to a screen position coord
 #define MTHS(m)	(m*SCALE+HSCALE)
+
 // converts a screen position coord to a map tile coord
 #define STM(s)	(s/SCALE)
-#define OSTM(s)	((s+(SCALE-1))/SCALE)
 
 char blocks[MAPY][MAPX] = {
 {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
