@@ -60,7 +60,6 @@ void drawGhosts(void)
 		ghostMask[SCALE-1][i]=ghostMask[SCALE-1][(i+1)%SCALE];
 }
 
-
 void drawPlayer(void)
 {
 	setColor(BLACK);

@@ -56,9 +56,6 @@ void loop()
 	Epoch elapsed;
 	inputs();
 
-	//screenBlank();
-	//drawMap();
-
 	moveGhosts();
 	drawGhosts();
 

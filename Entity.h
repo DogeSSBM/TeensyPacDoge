@@ -53,53 +53,19 @@ bool traversable(const char t)
 	return t!='#' && t!='g';
 }
 
-void removeAt(const uint x, const uint y)
+void setAtS(const uint x, const uint y, const char c)
 {
-	blocks[STM(y)][STM(x)] = ' ';
-}
-
-bool gridAligned(const uint x, const uint y)
-{
-	return ALIGNED(x) && ALIGNED(y);
+	blocks[STM(y)][STM(x)] = c;
 }
 
 bool checkBounds(const uint x, const uint y)
 {
-	bool ret =
+	return(
 	 	traversable(whatsAtS(x,y)) &&
 		traversable(whatsAtS(x+SCALE-1, y)) &&
-
 		traversable(whatsAtS(x,y+SCALE-1)) &&
-		traversable(whatsAtS(x+SCALE-1, y+SCALE-1));
-	//setColor(ret?GREEN:RED);
-	return ret;
-}
-
-AdjDir validPlayerMoves(void)
-{
-	AdjDir ret = {0};
-
-	ret.dirU = checkBounds(player.x,player.y-1);
-	// drawLine(
-		// player.x+HSCALE,player.y-HSCALE,
-		// player.x+HSCALE,player.y);
-
-	ret.dirR = checkBounds(player.x+1,player.y);
-	// drawLine(
-		// player.x+SCALE,player.y+HSCALE,
-		// player.x+SCALE+HSCALE,player.y+HSCALE);
-
-	ret.dirD = checkBounds(player.x,player.y+1);
-	// drawLine(
-		// player.x+HSCALE,player.y+SCALE,
-		// player.x+HSCALE,player.y+SCALE+HSCALE);
-
-	ret.dirL = checkBounds(player.x-1,player.y);
-	// drawLine(
-		// player.x-HSCALE,player.y+HSCALE,
-		// player.x,player.y+HSCALE);
-
-	return ret;
+		traversable(whatsAtS(x+SCALE-1, y+SCALE-1))
+	);
 }
 
 void movePlayer(void)
@@ -108,13 +74,23 @@ void movePlayer(void)
 	player.lastx = player.x;
 	player.lasty = player.y;
 
-	AdjDir validAdj = validPlayerMoves();
-	AdjDir tryAdj = {0};
-	tryAdj.dirU = btnState.btnU && !btnState.inverse.btnU;
-	tryAdj.dirR = btnState.btnR && !btnState.inverse.btnR;
-	tryAdj.dirD = btnState.btnD && !btnState.inverse.btnD;
-	tryAdj.dirL = btnState.btnL && !btnState.inverse.btnL;
+	// check adjacent tile boundaries for traversability
+	AdjDir validAdj = {
+		checkBounds(player.x,player.y-1),
+		checkBounds(player.x+1,player.y),
+		checkBounds(player.x,player.y+1),
+		checkBounds(player.x-1,player.y)
+	};
 
+	// check buttons and buffer turns to try
+	AdjDir tryAdj = {
+		btnState.btnU && !btnState.inverse.btnU,
+		btnState.btnR && !btnState.inverse.btnR,
+		btnState.btnD && !btnState.inverse.btnD,
+		btnState.btnL && !btnState.inverse.btnL
+	};
+
+	// turn player if possible
 	if(UD(player.facing)){
 		if(tryAdj.dirL && validAdj.dirL){
 			player.facing = DIR_L;
@@ -145,6 +121,7 @@ void movePlayer(void)
 		}
 	}
 
+	// move player in the direction they are facing if possible
 	if(validAdj.arr[player.facing]){
 		switch(player.facing){
 			case DIR_U:
@@ -169,11 +146,11 @@ void collidePlayer(void)
 	const uint y = player.y+HSCALE;
 	switch(whatsAtS(x, y)){
 		case '.':
-			removeAt(x,y);
+			setAtS(x,y,' ');
 			player.dots++;
 			break;
 		case '@':
-			removeAt(x,y);
+			setAtS(x,y,' ');
 			player.dots++;
 			player.power = 10*FPS;
 			break;
