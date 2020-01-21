@@ -46,13 +46,34 @@ void drawMask(const uint x, const uint y, const bool m[][SCALE])
 	}
 }
 
+void redrawAround(const uint x, const uint y)
+{
+	switch(whatsAtS(x, y)){
+		case '#':	// Wall
+			drawWall(STM(x), STM(y));
+			break;
+		case '.':	// Dot
+			drawDot(STM(x), STM(y), false);
+			break;
+		case '@':	// Power Dot
+			drawDot(STM(x), STM(y), true);
+			break;
+		case '0':	// Warp
+			screen.fillRect(x, y, SCALE-1, SCALE-1, DARKGREY);
+			break;
+		case ' ':	// Empty
+		default:
+
+			break;
+	}
+}
+
 void drawGhosts(void)
 {
 	for(uint i = 0; i < GHOSTSNUM; i++){
-		// if(ghosts[i].x == ghosts[i].lastx && ghosts[i].y == ghosts[i].lasty)
-			// continue;
 		setColor(BLACK);
 		drawMask(ghosts[i].lastx, ghosts[i].lasty, fillMask);
+		redrawAround((ghosts[i].lastx+HSCALE-1), (ghosts[i].lasty+HSCALE-1));
 		setColor(player.power?BLUE:ghosts[i].color);
 		drawMask(ghosts[i].x, ghosts[i].y, ghostMask);
 	}

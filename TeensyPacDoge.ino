@@ -4,6 +4,7 @@
 
 void setup()
 {
+	randomSeed(analogRead(0));
 	screenInit();
 	btnInit();
 	screen.println("Pac-Doge");
@@ -56,8 +57,9 @@ void loop()
 	Epoch elapsed;
 	inputs();
 
-	moveGhosts();
+	moveGhostsRandom();
 	drawGhosts();
+	collideGhosts();
 
 	movePlayer();
 	drawPlayer();
