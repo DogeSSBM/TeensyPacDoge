@@ -19,6 +19,22 @@ typedef union{
 	}inverse;
 }AdjDir;
 
+typedef union{
+	uint arr[4];
+	struct{
+		uint dirU;
+		uint dirR;
+		uint dirD;
+		uint dirL;
+	};
+	struct{
+		uint dirD;
+		uint dirL;
+		uint dirU;
+		uint dirR;
+	}inverse;
+}AdjBounds;
+
 // count number of valid adjacent tiles
 #define ADJC(d)	((d.arr[0]) + (d.arr[1]) + (d.arr[2]) + (d.arr[3]))
 
@@ -96,6 +112,17 @@ AdjDir getValidAdj(const uint x, const uint y)
 		checkBounds(x+1,y),
 		checkBounds(x,y+1),
 		checkBounds(x-1,y)
+	};
+	return ret;
+}
+
+AdjBounds getBounds(const uint x, const uint y)
+{
+	AdjBounds ret = {
+		y,
+		x+SCALE-1,
+		y+SCALE-1,
+		x
 	};
 	return ret;
 }
@@ -214,6 +241,23 @@ void collideGhosts(void)
 			case ' ':
 				break;
 		}
+		if(
+		STM(player.y) == STM(g->y) ||
+		STM(player.x) == STM(g->x)){
+
+			int dx = (player.x+HSCALE) - (g->x+HSCALE);
+			int dy = (player.y+HSCALE) - (g->y+HSCALE);
+			dx*=dx;
+			dy*=dy;
+			if(dy+dx < SCALE*SCALE){
+				if(player.power){
+					g->x = g->spawnx;
+					g->y = g->spawny;
+				}else{
+					_softRestart();
+				}
+			}
+		}
 	}
 }
 
@@ -253,48 +297,5 @@ void moveGhostsRandom(void)
 	}
 }
 
-// void moveGhosts(void)
-// {
-// 	for(uint i = 0; i < GHOSTSNUM; i++){
-// 		ghosts[i].lastx = ghosts[i].x;
-// 		ghosts[i].lasty = ghosts[i].y;
-// 		uint newx = ghosts[i].x;
-// 		uint newy = ghosts[i].y;
-// 		switch (ghosts[i].facing) {
-// 			case DIR_R:
-// 				newx+=ghosts[i].speed;
-// 				break;
-// 			case DIR_L:
-// 				newx-=ghosts[i].speed;
-// 				break;
-// 			case DIR_U:
-// 				newy-=ghosts[i].speed;
-// 				break;
-// 			case DIR_D:
-// 				newy+=ghosts[i].speed;
-// 				break;
-// 		}
-// 		switch (whatsAtS(newx,newy)) {
-// 			case '#':	// Wall
-// 				return;
-// 				break;
-// 			case '0':	// Warp
-// 				if(newx==0 && ghosts[i].facing==DIR_L){
-// 					newx = MTS(MAPX-1);
-// 					break;
-// 				}
-// 				if(newx==MTS(MAPX-1) && ghosts[i].facing==DIR_R){
-// 					newx = 0;
-// 					break;
-// 				}
-// 				break;
-// 			default:
-// 			case ' ':	// Empty
-// 				break;
-// 		}
-// 		ghosts[i].x = newx;
-// 		ghosts[i].y = newy;
-// 	}
-// }
 
 }// extern "C"
