@@ -57,7 +57,7 @@ void loop()
 	Epoch elapsed;
 	inputs();
 
-	moveGhostsRandom();
+	moveGhostsClosestTurn();
 	drawGhosts();
 	collideGhosts();
 

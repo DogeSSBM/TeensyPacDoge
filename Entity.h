@@ -47,8 +47,11 @@ typedef union{
 // true if d is a horizontal direction (DIR_L || DIR_R)
 #define LR(d)	( (d)&1)
 
-// true if s is alligned with the map coordanates when scaled down
+// true if s is aligned with the map coordanates when scaled down
 #define ALIGNED(s)(!(s%SCALE))
+
+// true if both x and y are both map coordanate aligned otherwise false
+#define ALIGNED2(x, y)(( (ALIGNED(x)) && (ALIGNED(y)) ))
 
 // evaluates to the perpendicular direction
 // (the direction pointing 90deg clockwise)
@@ -266,6 +269,58 @@ Direction randomValidAdjDir(AdjDir d)
 	Direction ret = (Direction)random(4);
 	while(!d.arr[ret = (Direction)random(4)]);
 	return ret;
+}
+
+Direction closestValidDir(const uint x, const uint y, const AdjDir d)
+{
+	Direction closeDir = randomValidAdjDir(d);
+	uint closeDist = 10000;
+	AdjBounds dist = {
+		(x  -player.x)*(x  -player.x) + (y-1-player.y)*(y-1-player.y),
+		(x+1-player.x)*(x+1-player.x) + (y  -player.y)*(y  -player.y),
+		(x  -player.x)*(x  -player.x) + (y+1-player.y)*(y+1-player.y),
+		(x-1-player.x)*(x-1-player.x) + (y  -player.y)*(y  -player.y),
+	};
+	for(uint i = 0; i < 4; i++){
+		if(!d.arr[i])
+			continue;
+		if(dist.arr[i] < closeDist){
+			closeDist = dist.arr[i];
+			closeDir = (Direction)i;
+		}
+	}
+	return closeDir;
+}
+
+void moveGhostsClosestTurn(void)
+{
+	for(uint i = 0; i < 4; i++){
+		Ghost *g = &ghosts[i];
+		g->lastx = g->x;
+		g->lasty = g->y;
+		AdjDir validAdj = getValidAdj(g->x, g->y);
+		if(!validAdj.arr[g->facing] && ALIGNED2(g->x, g->y)){
+			g->facing = closestValidDir(g->x, g->y, validAdj);
+		}
+
+		// move ghost in the direction they are facing if possible
+		if(validAdj.arr[g->facing]){
+			switch(g->facing){
+				case DIR_U:
+					g->y--;
+					break;
+				case DIR_R:
+					g->x++;
+					break;
+				case DIR_D:
+					g->y++;
+					break;
+				case DIR_L:
+					g->x--;
+					break;
+			}
+		}
+	}
 }
 
 void moveGhostsRandom(void)
