@@ -64,17 +64,6 @@ typedef union{
 #include "Player.h"
 #include "Ghost.h"
 
-const bool fillMask[SCALE][SCALE] = {
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1}
-};
-
 char whatsAtM(const uint x, const uint y)
 {
 	return blocks[x][y];

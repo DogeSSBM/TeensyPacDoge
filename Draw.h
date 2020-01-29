@@ -1,5 +1,16 @@
 #pragma once
 
+const bool fillMask[SCALE][SCALE] = {
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1}
+};
+
 void drawDot(uint x, uint y, bool power)
 {
 	screen.fillCircle(MTHS(x), MTHS(y), HSCALE/(power?2:3), YELLOW);
