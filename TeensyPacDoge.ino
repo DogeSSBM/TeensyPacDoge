@@ -16,6 +16,7 @@ void setup()
 	}
 	btnPressed.btnA = false;
 	screenBlank();
+	generateGraphAt(12,11);
 	drawMap();
 	setTextSize(1);
 }
